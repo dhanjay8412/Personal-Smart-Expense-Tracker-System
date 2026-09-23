@@ -29,7 +29,16 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const configuredClient = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
+      const incomingOrigin = origin.replace(/\/$/, '');
+
+      if (incomingOrigin === configuredClient || incomingOrigin.includes('localhost') || incomingOrigin.includes('127.0.0.1') || incomingOrigin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
